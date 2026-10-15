@@ -249,16 +249,8 @@ object SettingsManager {
      * it creates a new default subscription to ensure that ungroup
      **/
     fun removeSubscriptionWithDefault(subid: String) {
-//        val subsList = decodeSubsList()
-//        if (subsList.size == 1 && subsList.first() == DEFAULT_SUBSCRIPTION_ID) {
-//            Log.i(ANG_PACKAGE,"Attempted to remove the only existing default subscription, operation ignored.")
-//            return
-//        }
-
-        // Remove the subscription
         removeSubscription(subid)
 
-        // After removal, check if there are any subscriptions left. If not, create a default subscription.
         val subsList2 = decodeSubsList()
         if (subsList2.isNotEmpty()) {
             return
@@ -400,11 +392,6 @@ object SettingsManager {
 
     /**
      * Retrieves the currently selected VPN interface address configuration.
-     * This method reads the user's preference for VPN interface addressing and returns
-     * the corresponding configuration containing IPv4 and IPv6 addresses.
-     *
-     * @return The selected VpnInterfaceAddressConfig instance, or the default configuration
-     *         if no valid selection is found or if the stored index is invalid.
      */
     fun getCurrentVpnInterfaceAddressConfig(): VpnInterfaceAddressConfig {
         val selectedIndex = MmkvManager.decodeSettingsString(AppConfig.PREF_VPN_INTERFACE_ADDRESS_CONFIG_INDEX, "0")?.toInt()
@@ -480,7 +467,6 @@ object SettingsManager {
     }
 
     private fun migrateHysteria2PinSHA256() {
-        // Check if migration has already been done
         val migrationKey = "hysteria2_pin_sha256_migrated"
         if (MmkvManager.decodeSettingsBool(migrationKey, false)) {
             return
@@ -506,25 +492,17 @@ object SettingsManager {
 
     /**
      * Migrates server list from legacy KEY_ANG_CONFIGS to subscription-based storage.
-     * This method should be called once during app initialization after the storage structure change.
-     * Servers are grouped by their subscriptionId into respective subscription's serverList.
-     * Servers without subscription are moved to the default subscription.
-     * After migration, KEY_ANG_CONFIGS is removed.
      */
     private fun migrateServerListToSubscriptions() {
-        // Check if migration has already been done
         val migrationKey = "server_list_to_subscriptions_migrated"
         if (MmkvManager.decodeSettingsBool(migrationKey, false)) {
             return
         }
 
-        // Ensure default subscription exists before migration
         ensureDefaultSubscription()
 
-        // Read existing server list from legacy KEY_ANG_CONFIGS
         val oldJson = MmkvManager.readLegacyServerList()
         if (oldJson.isNullOrBlank()) {
-            // No data to migrate, mark as done
             MmkvManager.encodeSettings(migrationKey, true)
             return
         }
@@ -536,7 +514,6 @@ object SettingsManager {
 
         val subscriptionServerMap = mutableMapOf<String, MutableList<String>>()
 
-        // Group servers by subscription (use default subscription for empty subscriptionId)
         guids.forEach { guid ->
             val config = decodeServerConfig(guid) ?: return@forEach
             val subId = config.subscriptionId.ifEmpty { DEFAULT_SUBSCRIPTION_ID }
@@ -544,20 +521,15 @@ object SettingsManager {
             subscriptionServerMap.getOrPut(subId) { mutableListOf() }.add(guid)
         }
 
-        // Update each subscription's serverList (including default subscription)
         subscriptionServerMap.forEach { (subId, serverGuids) ->
             MmkvManager.encodeServerList(serverGuids, subId)
         }
 
-
-        // Mark migration as complete
         MmkvManager.encodeSettings(migrationKey, true)
     }
 
     /**
      * Ensures the default subscription exists for ungrouped servers.
-     * This subscription is used internally to store servers without a subscription.
-     * Made public for migration in SettingsManager.
      */
     private fun ensureDefaultSubscription() {
         if (decodeSubscription(DEFAULT_SUBSCRIPTION_ID) == null) {
@@ -566,10 +538,48 @@ object SettingsManager {
             )
             encodeSubscription(DEFAULT_SUBSCRIPTION_ID, defaultSub)
 
-            // Move top
             val subsList = decodeSubsList()
             if (subsList.count() > 1) {
                 swapSubscriptions(0, subsList.count() - 1)
+            }
+        }
+        
+        // --- ИНТЕГРИРОВАНО: Автоматическое добавление полезных подписок для РФ ---
+        ensureRussianSubscriptions()
+    }
+
+    /**
+     * Добавляет предустановленные подписки для пользователей из РФ, если их еще нет.
+     */
+    private fun ensureRussianSubscriptions() {
+        val ruSubs = listOf(
+            SubscriptionItem(
+                remarks = "🇷🇺 Igar: Белые списки (Топ 150)",
+                url = "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
+                enabled = true,
+                autoUpdate = true
+            ),
+            SubscriptionItem(
+                remarks = "🇷🇺 Igar: Черные списки (RU-Direct)",
+                url = "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt",
+                enabled = true,
+                autoUpdate = true
+            ),
+            SubscriptionItem(
+                remarks = "🛡️ RJSXRD: SNI/CIDR Bypass",
+                url = "https://raw.githubusercontent.com/whoahaow/rjsxrd/refs/heads/main/githubmirror/bypass/bypass-all.txt",
+                enabled = true,
+                autoUpdate = true
+            )
+        )
+
+        val existingSubs = MmkvManager.decodeSubscriptions()
+        
+        for (sub in ruSubs) {
+            val exists = existingSubs.any { it.subscription.url == sub.url }
+            if (!exists) {
+                val newId = java.util.UUID.randomUUID().toString()
+                encodeSubscription(newId, sub)
             }
         }
     }
