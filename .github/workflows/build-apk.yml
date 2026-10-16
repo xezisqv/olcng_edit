@@ -65,8 +65,14 @@ jobs:
       - name: Build F-Droid Debug APK
         run: cd V2rayNG && ./gradlew assembleFdroidDebug
 
+      - name: Find APK file
+        run: |
+          echo "Searching for APK files..."
+          find V2rayNG/app/build/outputs -name "*.apk" -type f
+          echo "APK_PATH=$(find V2rayNG/app/build/outputs -name "*.apk" -type f | head -1)" >> $GITHUB_ENV
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: olcng-fdroid-debug-apk
-          path: V2rayNG/app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+          path: ${{ env.APK_PATH }}
