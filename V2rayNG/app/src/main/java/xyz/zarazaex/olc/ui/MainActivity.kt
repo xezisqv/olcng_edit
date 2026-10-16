@@ -132,8 +132,13 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             insets
         }
 
-        findViewById<android.view.View>(R.id.drawer_settings)?.setOnClickListener {
-            requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
+               // Получаем header view из NavigationView
+        val headerView = binding.navView.getHeaderView(0)
+        
+        // Теперь ищем кнопку внутри header
+        headerView.findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
+            android.widget.Toast.makeText(this, "Открываем настройки подписок...", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
         }
         findViewById<android.view.View>(R.id.drawer_per_app)?.setOnClickListener {
