@@ -132,30 +132,28 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             insets
         }
 
-              // Получаем header view из NavigationView
+                 // --- НАСТРОЙКА КНОПОК БОКОВОГО МЕНЮ ---
+
+        // 1. Кнопка "Группы" находится в header (файл nav_header.xml)
         val headerView = binding.navView.getHeaderView(0)
-        
-        // 1. Настройки
-        headerView.findViewById<android.view.View>(R.id.drawer_settings)?.setOnClickListener {
-            requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
-            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
-        }
-        
-        // 2. Для приложений
-        headerView.findViewById<android.view.View>(R.id.drawer_per_app)?.setOnClickListener {
-            requestActivityLauncher.launch(Intent(this, PerAppProxyActivity::class.java))
-            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
-        }
-        
-        // 3. Проверка обновлений
-        headerView.findViewById<android.view.View>(R.id.drawer_check_update)?.setOnClickListener {
-            startActivity(Intent(this, CheckUpdateActivity::class.java))
+        headerView.findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
+            startActivity(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
         }
 
-        // 4. Группы / Подписки (Наша новая кнопка)
-        headerView.findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
-            startActivity(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
+        // 2. Остальные кнопки находятся в activity_main.xml, поэтому ищем их через binding
+        binding.drawerSettings.setOnClickListener {
+            requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
+            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
+        }
+
+        binding.drawerPerApp.setOnClickListener {
+            requestActivityLauncher.launch(Intent(this, PerAppProxyActivity::class.java))
+            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
+        }
+
+        binding.drawerCheckUpdate.setOnClickListener {
+            startActivity(Intent(this, CheckUpdateActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
         }
         fun removeUnderlines(textView: android.widget.TextView?) {
