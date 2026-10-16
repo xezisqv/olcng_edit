@@ -143,17 +143,6 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         findViewById<android.view.View>(R.id.drawer_check_update)?.setOnClickListener {
             startActivity(Intent(this, CheckUpdateActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
-             }
-                           findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
-            // Стандартный системный Toast, который точно скомпилируется
-            android.widget.Toast.makeText(this, "Кнопка 'Группы' нажата! Открываем...", android.widget.Toast.LENGTH_SHORT).show()
-            
-            // Открываем экран настроек подписок
-            requestActivityLauncher.launch(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
-            binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
-        } ?: run {
-            // Если вдруг ID не совпал, мы увидим это сообщение
-            android.widget.Toast.makeText(this, "Ошибка: кнопка не найдена в layout", android.widget.Toast.LENGTH_SHORT).show()
         }
         fun removeUnderlines(textView: android.widget.TextView?) {
             if (textView == null) return
@@ -1089,8 +1078,12 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     }
 
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+       override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.nav_sub_setting -> {
+                // Открываем экран управления подписками
+                startActivity(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
+            }
             R.id.per_app_proxy_settings -> requestActivityLauncher.launch(Intent(this, PerAppProxyActivity::class.java))
             R.id.settings -> requestActivityLauncher.launch(Intent(this, SettingsActivity::class.java))
             R.id.check_update -> startActivity(Intent(this, CheckUpdateActivity::class.java))
