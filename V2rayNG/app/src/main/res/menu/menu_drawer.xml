@@ -13,7 +13,10 @@
             android:id="@+id/settings"
             android:icon="@drawable/ic_settings_24dp"
             android:title="@string/title_settings" />
-
+    <item
+        android:id="@+id/nav_sub_setting"
+        android:icon="@drawable/ic_file_24dp"
+        android:title="@string/title_sub_setting" />
         <item
             android:id="@+id/check_update"
             android:icon="@drawable/ic_check_update_24dp"
