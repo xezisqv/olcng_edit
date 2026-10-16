@@ -20,11 +20,29 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Download pre-compiled libv2ray.aar
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install Gomobile
         run: |
-          mkdir -p V2rayNG/app/libs
-          curl -L -o V2rayNG/app/libs/libv2ray.aar https://github.com/2dust/AndroidLibXrayLite/releases/latest/download/libv2ray.aar
-          echo "✅ libv2ray.aar successfully downloaded"
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          gomobile init
+
+      - name: Build libv2ray.aar from source
+        run: |
+          cd AndroidLibXrayLite
+          mkdir -p assets data
+          bash gen_assets.sh download || true
+          cp -v data/*.dat assets/ || true
+          go mod tidy
+          gomobile bind -v -androidapi 24 -trimpath -ldflags='-s -w -buildid=' -o libv2ray.aar ./
+          mkdir -p ../V2rayNG/app/libs
+          cp libv2ray.aar ../V2rayNG/app/libs/
+          echo "✅ libv2ray.aar successfully built and copied"
 
       - name: Set up Android NDK
         uses: nttld/setup-ndk@v1
