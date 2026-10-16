@@ -201,7 +201,8 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         }
 
         checkForUpdatesOnStartup()
-        showDonateDialogIfNeeded()
+                // showDonateDialogIfNeeded()          // Отключено всплывающее окно донатов
+
     }
 
     private fun setupViewModel() {
