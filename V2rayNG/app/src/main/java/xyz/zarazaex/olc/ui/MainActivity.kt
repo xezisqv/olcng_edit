@@ -144,9 +144,16 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             startActivity(Intent(this, CheckUpdateActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
              }
-                    findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
-            requestActivityLauncher.launch(Intent(this, SubSettingActivity::class.java))
+                   findViewById<android.view.View>(R.id.drawer_sub_setting)?.setOnClickListener {
+            // Тестовое сообщение: если оно появится, значит кнопка работает, но не открывается экран
+            xyz.zarazaex.olc.extension.toast(this, "Кнопка 'Группы' нажата!")
+            
+            // Попытка открыть экран настроек подписок
+            requestActivityLauncher.launch(Intent(this, xyz.zarazaex.olc.ui.SubSettingActivity::class.java))
             binding.drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START)
+        } ?: run {
+            // Если кнопка не найдена, это сообщение поможет нам понять проблему
+            xyz.zarazaex.olc.extension.toast(this, "Ошибка: кнопка drawer_sub_setting не найдена в layout")
         }
         fun removeUnderlines(textView: android.widget.TextView?) {
             if (textView == null) return
